@@ -73,22 +73,25 @@ func guard(api *api.JormungandrAPI) {
     }
     // delete all registered leaders
     leaders, err := api.GetRegisteredLeaders()
+    logrus.Infof("Registered leaders detected: %v", leaders)
     if err == nil {
-        for n := 0; n < len(leaders); n++ {
-            go deleteLeader(api, leaders[n])
+        for n := range leaders {
+            deleteLeader(api, leaders[n])
         }
     } else {
         logrus.Error("Failed to deregister the leaders.")
     }
 }
 
-func deleteLeader(api *api.JormungandrAPI, leaderId uint64) {
+func deleteLeader(api *api.JormungandrAPI, leaderID uint64) {
     for i := 0; i < 3; i++ {
-        _, err := api.RemoveRegisteredLeader(leaderId)
-        if err == nil {
+        logrus.Infof("%v. try to remove the leader %v", i+1, leaderID)
+        found, err := api.RemoveRegisteredLeader(leaderID)
+        if found {
+            logrus.Infof("Deleted leader %v successfully.", leaderID)
             break
-        } else {
-            logrus.Errorf("Leader %v: %v", leaderId, err.Error())
+        } else if err != nil {
+            logrus.Errorf("Leader %v: %v", leaderID, err.Error())
         }
         time.Sleep(1 * time.Second)
     }
