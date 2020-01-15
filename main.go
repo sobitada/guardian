@@ -36,6 +36,7 @@ func getJormungandrAPI(nodeConfigPath string) (*api.JormungandrAPI, error) {
 }
 
 func main() {
+    interval := flag.Int64("i", 1000, "interval in milliseconds. default: 1000ms")
     flag.Parse()
     args := flag.Args()
     if len(args) == 1 && len(args[0]) > 0 {
@@ -48,7 +49,7 @@ func main() {
         apiObj, err := getJormungandrAPI(args[0])
         if err == nil {
             // start guarding the node
-            guard(apiObj)
+            guard(apiObj, time.Duration(*interval)*time.Millisecond)
         } else {
             logrus.Errorf("API access could not be constructed given the node config at '%v'.", args[0])
             os.Exit(1)
@@ -59,7 +60,7 @@ func main() {
     }
 }
 
-func guard(api *api.JormungandrAPI) {
+func guard(api *api.JormungandrAPI, interval time.Duration) {
     for ; ; {
         stats, bootstrapping, err := api.GetNodeStatistics()
         if err == nil {
@@ -68,8 +69,10 @@ func guard(api *api.JormungandrAPI) {
             } else if bootstrapping {
                 logrus.Info("Node is bootstrapping.")
             }
+        } else {
+            logrus.Infof("Node is not reachable. %v", err.Error())
         }
-        time.Sleep(1 * time.Second)
+        time.Sleep(interval)
     }
     // delete all registered leaders
     leaders, err := api.GetRegisteredLeaders()
