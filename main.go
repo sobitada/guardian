@@ -36,7 +36,7 @@ func getJormungandrAPI(nodeConfigPath string) (*api.JormungandrAPI, error) {
 }
 
 func main() {
-    interval := flag.Int64("i", 1000, "interval in milliseconds. default: 1000ms")
+    interval := flag.Int64("i", 1000, "interval in milliseconds.")
     flag.Parse()
     args := flag.Args()
     if len(args) == 1 && len(args[0]) > 0 {
@@ -55,7 +55,8 @@ func main() {
             os.Exit(1)
         }
     } else {
-        print("Usage: guardian <node-config.yml>\n")
+        fmt.Printf("Usage: guardian <node-config.yml>\n")
+        flag.PrintDefaults()
         os.Exit(1)
     }
 }
