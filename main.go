@@ -26,7 +26,7 @@ func getJormungandrAPI(nodeConfigPath string) (*api.JormungandrAPI, error) {
         if err == nil {
             var host = nodeConfig.Rest.Listen
             if len(host) > 0 {
-                return api.GetAPIFromHost(fmt.Sprintf("http://%v", host))
+                return api.GetAPIFromHost(fmt.Sprintf("http://%v", host), 2*time.Second)
             } else {
                 return nil, errors.New("host at which the API is listening must not be empty")
             }
